@@ -22,32 +22,32 @@ import {
 function statusText(state: UiState, coarse: boolean): string {
   switch (state) {
     case "idle":
-      return "ATTRACT MODE — PRESS SPACE OR TAP TO PLAY";
+      return "CHẾ ĐỘ THỬ NGHIỆM — NHẤN SPACE HOẶC CHẠM ĐỂ CHƠI";
     case "countdown":
-      return "GET READY…";
+      return "CHUẨN BỊ SẴN SÀNG…";
     case "playing":
-      return coarse ? "SWIPE OR PAD TO STEER · CENTER KEY PAUSES" : "SPACE — PAUSE · R — RESTART";
+      return coarse ? "VUỐT HOẶC DÙNG PHÍM ẢO ĐỂ ĐIỀU HƯỚNG" : "SPACE: TẠM DỪNG · R: CHƠI LẠI";
     case "paused":
-      return "PAUSED — SPACE TO RESUME";
+      return "ĐANG TẠM DỪNG — BẤM SPACE ĐỂ TIẾP TỤC";
     case "over":
-      return "PRESS R OR TAP THE PIT TO RETRY";
+      return "BẤM R HOẶC CHẠM ĐỂ CHƠI LẠI";
     case "won":
-      return "NOTHING LEFT TO EAT — PRESS R TO RUN IT BACK";
+      return "BẠN ĐÃ ĂN HẾT MỌI THỨ — BẤM R ĐỂ CHẠY LẠI";
   }
 }
 
 function ledColor(state: UiState): string {
   switch (state) {
     case "playing":
-      return "#a3e635";
+      return "#10b981";
     case "paused":
-      return "#fbbf24";
+      return "#facc15";
     case "over":
-      return "#f95f62";
+      return "#f43f5e";
     case "won":
-      return "#a3e635";
+      return "#22d3ee";
     default:
-      return "#43d9bd";
+      return "#38bdf8";
   }
 }
 
@@ -76,64 +76,66 @@ export default function App() {
   };
 
   return (
-    <div className="no-tap-highlight relative flex min-h-dvh flex-col overflow-hidden font-body text-fog-100">
-      {/* ---------- ambient background ---------- */}
+    <div className="no-tap-highlight relative flex min-h-dvh flex-col overflow-hidden font-body text-slate-100 bg-[#060913]">
+      {/* ---------- ambient cosmic background ---------- */}
       <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(90% 60% at 50% -10%, rgba(23,179,154,0.14), transparent 60%), radial-gradient(70% 50% at 85% 110%, rgba(163,230,53,0.10), transparent 60%), radial-gradient(60% 45% at 8% 90%, rgba(251,191,36,0.06), transparent 55%), linear-gradient(180deg, #081711 0%, #07130e 55%, #06100b 100%)",
+              "radial-gradient(80% 60% at 50% -10%, rgba(6, 182, 212, 0.16), transparent 60%), radial-gradient(70% 50% at 90% 110%, rgba(16, 185, 129, 0.12), transparent 60%), radial-gradient(60% 50% at 10% 90%, rgba(244, 63, 94, 0.08), transparent 55%), linear-gradient(180deg, #070b16 0%, #060913 60%, #04060c 100%)",
           }}
         />
         <div
-          className="absolute inset-0 opacity-60"
+          className="absolute inset-0 opacity-40"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(163,230,53,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(163,230,53,0.04) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
+              "linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
             maskImage: "radial-gradient(80% 70% at 50% 40%, black 30%, transparent 100%)",
             WebkitMaskImage: "radial-gradient(80% 70% at 50% 40%, black 30%, transparent 100%)",
           }}
         />
-        <Fireflies count={16} />
+        <Fireflies count={20} />
       </div>
 
       {/* ---------- header ---------- */}
-      <header className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 pb-3 pt-4 md:pt-5">
-        <div className="flex items-center gap-3">
-          <LogoMark />
+      <header className="mx-auto flex w-full max-w-[1100px] items-center justify-between gap-4 px-4 pb-3 pt-5">
+        <div className="flex items-center gap-3.5">
+          <LogoMark size={42} />
           <div>
-            <div className="font-arcade text-[13px] leading-none tracking-wide text-venom-400 glow-lime md:text-[15px]">
+            <div className="font-arcade text-lg font-black leading-none tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">
               SERPENTINE
             </div>
-            <div className="mt-1.5 text-[9px] font-semibold tracking-[0.4em] text-fog-500">ARCADE SNAKE</div>
+            <div className="mt-1 text-[10px] font-bold tracking-[0.35em] text-slate-400">CYBER SNAKE ARENA</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="panel flex items-center gap-2 rounded-md px-3 py-2.5" title={`Best score on ${cfg.name}`}>
-            <IconTrophy size={13} />
-            <span key={best} className="anim-pop inline-block font-arcade text-[11px] text-gild-400">
+        <div className="flex items-center gap-2.5">
+          <div className="panel panel-card flex items-center gap-2.5 rounded-xl px-3.5 py-2" title={`Best score on ${cfg.name}`}>
+            <IconTrophy size={15} />
+            <span key={best} className="anim-pop inline-block font-arcade text-sm font-bold text-amber-300 glow-gold">
               {best}
             </span>
-            <span className="hidden text-[9px] font-bold tracking-[0.2em] text-fog-500 sm:inline">BEST · {cfg.name}</span>
+            <span className="hidden text-[10px] font-bold tracking-[0.2em] text-slate-400 sm:inline">KỶ LỤC · {cfg.name}</span>
           </div>
           <button
             type="button"
             onClick={g.toggleMute}
             aria-pressed={!g.muted}
-            aria-label={g.muted ? "Unmute sound" : "Mute sound"}
-            className={`btn-arcade panel rounded-md p-2.5 ${g.muted ? "text-fog-500" : "text-venom-400"}`}
+            aria-label={g.muted ? "Bật âm thanh" : "Tắt âm thanh"}
+            className={`btn-arcade panel rounded-xl p-2.5 transition-all cursor-pointer ${
+              g.muted ? "text-slate-500 hover:text-slate-300" : "text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+            }`}
           >
-            <IconSound on={!g.muted} />
+            <IconSound on={!g.muted} size={18} />
           </button>
         </div>
       </header>
 
       {/* ---------- main ---------- */}
-      <main className="mx-auto grid w-full max-w-[1080px] flex-1 grid-cols-1 items-start gap-5 px-4 pb-6 lg:grid-cols-[236px_minmax(0,1fr)_258px] lg:gap-6">
-        {/* left — score */}
-        <aside className="order-2 hidden flex-col gap-4 lg:order-1 lg:flex">
+      <main className="mx-auto grid w-full max-w-[1100px] flex-1 grid-cols-1 items-start gap-5 px-4 pb-6 lg:grid-cols-[250px_minmax(0,1fr)_265px] lg:gap-6">
+        {/* left — score & notes */}
+        <aside className="order-2 hidden flex-col gap-5 lg:order-1 lg:flex">
           <ScorePanel
             score={g.score}
             best={best}
@@ -143,67 +145,66 @@ export default function App() {
             dkey={g.difficulty}
             isRecord={g.isRecord}
           />
-          <div className="panel rounded-lg p-4">
-            <PanelLabel>FIELD NOTES</PanelLabel>
-            <ul className="mt-3 flex flex-col gap-2 text-[11px] leading-relaxed text-fog-400">
-              <li>
-                <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-ember-500 align-middle shadow-[0_0_8px_rgba(249,95,98,0.8)]" />
-                Apples pay <span className="font-bold text-fog-100">10 × {cfg.mult}</span> and a little speed.
+          <div className="panel panel-card rounded-2xl p-5 shadow-xl">
+            <PanelLabel>QUY TẮC CHƠI</PanelLabel>
+            <ul className="mt-3.5 flex flex-col gap-2.5 text-xs leading-relaxed text-slate-300">
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                <span>Mỗi quả táo: <strong className="text-white">10 × {cfg.mult} điểm</strong>.</span>
               </li>
-              <li>
-                <span className="mr-1.5 inline-block h-2 w-2 rotate-45 bg-gild-400 align-middle shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                Every 5th apple lures a <span className="font-bold text-gild-300">gold star — 50 × {cfg.mult}</span>, gone in ~7s.
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 shrink-0 rotate-45 bg-amber-400 shadow-[0_0_8px_rgba(250,204,21,0.8)]" />
+                <span>Mỗi 5 quả có <strong className="text-amber-300">sao vàng: 50 × {cfg.mult} điểm</strong> (~7s).</span>
               </li>
-              <li>
-                <span className="mr-1.5 inline-block h-2 w-2 bg-mint-400 align-middle shadow-[0_0_8px_rgba(67,217,189,0.8)]" />
-                Walls and your own tail end the run.
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 shrink-0 rounded-sm bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                <span>Tường viền, đá sụp và đuôi sẽ kết thúc ván.</span>
               </li>
             </ul>
           </div>
         </aside>
 
-        {/* center — the pit */}
-        <section className="order-1 flex flex-col gap-3 lg:order-2">
+        {/* center — the pit arena */}
+        <section className="order-1 flex flex-col gap-3.5 lg:order-2">
           {/* mobile score strip */}
-          <div className="panel flex items-center justify-between gap-2 rounded-lg px-4 py-2.5 lg:hidden">
+          <div className="panel flex items-center justify-between gap-2 rounded-2xl px-5 py-3 lg:hidden shadow-lg">
             <div>
-              <div className="text-[8px] font-bold tracking-[0.25em] text-fog-500">SCORE</div>
-              <div key={g.score} className="anim-pop font-arcade text-[15px] leading-tight text-venom-400 glow-lime">
+              <div className="text-[9px] font-bold tracking-[0.25em] text-slate-400">ĐIỂM SỐ</div>
+              <div key={g.score} className="anim-pop font-arcade text-xl font-black leading-tight text-emerald-400 glow-lime">
                 {g.score}
               </div>
             </div>
             <div>
-              <div className="text-[8px] font-bold tracking-[0.25em] text-fog-500">BEST</div>
-              <div className="font-arcade text-[15px] leading-tight text-gild-400">{best}</div>
+              <div className="text-[9px] font-bold tracking-[0.25em] text-slate-400">KỶ LỤC</div>
+              <div className="font-arcade text-xl font-bold leading-tight text-amber-300 glow-gold">{best}</div>
             </div>
             <div>
-              <div className="text-[8px] font-bold tracking-[0.25em] text-fog-500">LENGTH</div>
-              <div className="font-arcade text-[15px] leading-tight text-mint-300">{g.len}</div>
+              <div className="text-[9px] font-bold tracking-[0.25em] text-slate-400">CHIỀU DÀI</div>
+              <div className="font-arcade text-xl font-bold leading-tight text-cyan-300 glow-mint">{g.len}</div>
             </div>
-            <div className="rounded-sm border border-gild-400/30 bg-gild-400/10 px-1.5 py-1 font-arcade text-[9px] text-gild-300">
+            <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-2 py-1 font-arcade text-[10px] font-bold text-amber-300">
               ×{cfg.mult}
             </div>
           </div>
 
           {/* board frame */}
-          <div className="relative mx-auto w-full max-w-[540px]">
+          <div className="relative mx-auto w-full max-w-[550px]">
             {/* corner brackets */}
-            <span className="pointer-events-none absolute -left-1.5 -top-1.5 z-30 h-4 w-4 border-l-2 border-t-2 border-venom-500/60" aria-hidden />
-            <span className="pointer-events-none absolute -right-1.5 -top-1.5 z-30 h-4 w-4 border-r-2 border-t-2 border-venom-500/60" aria-hidden />
-            <span className="pointer-events-none absolute -bottom-1.5 -left-1.5 z-30 h-4 w-4 border-b-2 border-l-2 border-venom-500/60" aria-hidden />
-            <span className="pointer-events-none absolute -bottom-1.5 -right-1.5 z-30 h-4 w-4 border-b-2 border-r-2 border-venom-500/60" aria-hidden />
+            <span className="pointer-events-none absolute -left-1.5 -top-1.5 z-30 h-4 w-4 border-l-2 border-t-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]" aria-hidden />
+            <span className="pointer-events-none absolute -right-1.5 -top-1.5 z-30 h-4 w-4 border-r-2 border-t-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]" aria-hidden />
+            <span className="pointer-events-none absolute -bottom-1.5 -left-1.5 z-30 h-4 w-4 border-b-2 border-l-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]" aria-hidden />
+            <span className="pointer-events-none absolute -bottom-1.5 -right-1.5 z-30 h-4 w-4 border-b-2 border-r-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]" aria-hidden />
 
             <div
-              className="rounded-xl border border-pit-line bg-gradient-to-b from-pit-800 to-pit-900 p-2 shadow-[0_0_70px_-16px_rgba(163,230,53,0.35),0_30px_60px_-30px_rgba(0,0,0,0.9)]"
+              className="rounded-2xl border border-white/10 bg-gradient-to-b from-[#0f172a] to-[#090e1c] p-2.5 shadow-[0_0_80px_-15px_rgba(6,182,212,0.25),0_30px_70px_-20px_rgba(0,0,0,0.9)]"
             >
               <div
-                className="relative touch-none select-none overflow-hidden rounded-[10px]"
+                className="relative touch-none select-none overflow-hidden rounded-xl border border-white/5"
                 onPointerDown={g.onBoardPointerDown}
                 onPointerUp={g.onBoardPointerUp}
                 onPointerCancel={() => undefined}
               >
                 <canvas ref={g.canvasRef} className="block aspect-square w-full" aria-label="Snake game board" />
-                <div className="scanlines pointer-events-none absolute inset-0 opacity-25" aria-hidden />
                 <div className="board-vignette pointer-events-none absolute inset-0" aria-hidden />
                 <BoardOverlay
                   state={g.state}
@@ -224,51 +225,51 @@ export default function App() {
           </div>
 
           {/* status bar */}
-          <div className="mx-auto flex w-full max-w-[540px] items-center justify-between gap-3 rounded-md border border-pit-line/70 bg-pit-900/70 px-3 py-2">
-            <div className="flex min-w-0 items-center gap-2">
+          <div className="mx-auto flex w-full max-w-[550px] items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 backdrop-blur-md">
+            <div className="flex min-w-0 items-center gap-2.5">
               <span
-                className={`h-2 w-2 shrink-0 rounded-full ${g.state === "playing" ? "anim-pulse-soft" : ""}`}
-                style={{ background: ledColor(g.state), boxShadow: `0 0 10px ${ledColor(g.state)}` }}
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${g.state === "playing" ? "anim-pulse-soft" : ""}`}
+                style={{ background: ledColor(g.state), boxShadow: `0 0 12px ${ledColor(g.state)}` }}
               />
-              <span className="truncate text-[10px] font-semibold tracking-[0.18em] text-fog-400">
+              <span className="truncate text-xs font-semibold tracking-wider text-slate-300">
                 {statusText(g.state, coarse)}
               </span>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[9px] font-bold tracking-[0.2em] text-fog-500">SPD</span>
+            <div className="flex shrink-0 items-center gap-2.5">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400">TỐC ĐỘ</span>
               <SpeedPips tickMs={g.tickMs} dkey={g.difficulty} />
             </div>
           </div>
 
           {/* mobile quick controls */}
-          <div className="mx-auto flex w-full max-w-[540px] items-center justify-center gap-2 lg:hidden">
+          <div className="mx-auto flex w-full max-w-[550px] items-center justify-center gap-2.5 lg:hidden">
             <button
               type="button"
               onClick={g.togglePause}
               disabled={g.state !== "playing" && g.state !== "paused"}
-              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-md border border-pit-line bg-pit-800/70 px-4 py-2.5 font-arcade text-[9px] text-fog-100 enabled:hover:border-venom-500/50 enabled:hover:text-venom-300 disabled:opacity-40"
+              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 font-arcade text-xs font-semibold text-slate-200 enabled:hover:border-cyan-400/50 enabled:hover:text-cyan-300 disabled:opacity-40"
             >
-              {g.state === "paused" ? <IconPlay size={10} /> : <IconPause size={10} />}
-              {g.state === "paused" ? "RESUME" : "PAUSE"}
+              {g.state === "paused" ? <IconPlay size={12} /> : <IconPause size={12} />}
+              {g.state === "paused" ? "TIẾP TỤC" : "TẠM DỪNG"}
             </button>
             <button
               type="button"
               onClick={g.restart}
-              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-md border border-pit-line bg-pit-800/70 px-4 py-2.5 font-arcade text-[9px] text-fog-100 hover:border-venom-500/50 hover:text-venom-300"
+              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 font-arcade text-xs font-semibold text-slate-200 hover:border-cyan-400/50 hover:text-cyan-300"
             >
-              <IconRestart size={10} /> RESTART
+              <IconRestart size={12} /> CHƠI LẠI
             </button>
             <button
               type="button"
               onClick={g.toMenu}
-              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-md border border-pit-line bg-pit-800/70 px-4 py-2.5 font-arcade text-[9px] text-fog-100 hover:border-venom-500/50 hover:text-venom-300"
+              className="btn-arcade no-tap-highlight flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 font-arcade text-xs font-semibold text-slate-200 hover:border-cyan-400/50 hover:text-cyan-300"
             >
-              <IconHome size={10} /> MENU
+              <IconHome size={12} /> MENU
             </button>
           </div>
 
           {/* mobile difficulty */}
-          <div className="mx-auto w-full max-w-[540px] lg:hidden">
+          <div className="mx-auto w-full max-w-[550px] lg:hidden">
             <DiffPicker
               compact
               value={g.difficulty}
@@ -279,17 +280,17 @@ export default function App() {
 
           {/* d-pad for touch devices */}
           {coarse && (
-            <div className="mx-auto mt-1 lg:hidden">
+            <div className="mx-auto mt-2 lg:hidden">
               <DPad onDir={g.pressDirection} onCenter={onCenter} centerIcon={centerIcon} />
             </div>
           )}
         </section>
 
-        {/* right — difficulty + controls */}
-        <aside className="order-3 hidden flex-col gap-4 lg:flex">
-          <div className="panel rounded-lg p-4">
-            <PanelLabel>DIFFICULTY</PanelLabel>
-            <div className="mt-3">
+        {/* right — difficulty & controls */}
+        <aside className="order-3 hidden flex-col gap-5 lg:flex">
+          <div className="panel panel-card rounded-2xl p-5 shadow-xl">
+            <PanelLabel>CHẾ ĐỘ ĐỘ KHÓ</PanelLabel>
+            <div className="mt-3.5">
               <DiffPicker
                 value={g.difficulty}
                 onSelect={g.setDifficulty}
@@ -302,10 +303,10 @@ export default function App() {
       </main>
 
       {/* ---------- footer ---------- */}
-      <footer className="mx-auto w-full max-w-[1080px] px-4 pb-5">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-pit-line/60 pt-3 text-[9px] font-semibold tracking-[0.3em] text-fog-500">
-          <span>SERPENTINE · EAT · GROW · SURVIVE</span>
-          <span className="text-fog-500/70">HIGH SCORES LIVE IN THIS BROWSER</span>
+      <footer className="mx-auto w-full max-w-[1100px] px-4 pb-5 pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3 text-[10px] font-semibold tracking-[0.25em] text-slate-500">
+          <span>SERPENTINE · ĂN TÁO · LỚN LÊN · TỬ THẦN 990</span>
+          <span className="text-slate-500">KỶ LỤC LƯU TRỰC TIẾP TRÊN TRÌNH DUYỆT NÀY</span>
         </div>
       </footer>
     </div>

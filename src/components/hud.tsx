@@ -8,20 +8,20 @@ const ic = "inline-block align-middle";
 export function IconPlay({ size = 14 }: { size?: number }) {
   return (
     <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-      <path d="M4 2.5v11l9-5.5-9-5.5z" />
+      <path d="M4.5 2.8v10.4l8.6-5.2-8.6-5.2z" />
     </svg>
   );
 }
 export function IconPause({ size = 14 }: { size?: number }) {
   return (
     <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-      <path d="M3.5 2.5h3.4v11H3.5zM9.1 2.5h3.4v11H9.1z" />
+      <path d="M3.5 2.5h3.2v11H3.5zM9.3 2.5h3.2v11H9.3z" />
     </svg>
   );
 }
 export function IconRestart({ size = 14 }: { size?: number }) {
   return (
-    <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" strokeLinecap="round" />
       <path d="M13.7 1.8v3.4h-3.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -50,7 +50,7 @@ export function IconStar({ size = 12 }: { size?: number }) {
 }
 export function IconSound({ on, size = 16 }: { on: boolean; size?: number }) {
   return (
-    <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+    <svg className={ic} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
       <path d="M2.5 6v4h2.5L9 13V3L5 6H2.5z" fill="currentColor" stroke="none" />
       {on ? (
         <>
@@ -63,7 +63,7 @@ export function IconSound({ on, size = 16 }: { on: boolean; size?: number }) {
     </svg>
   );
 }
-export function IconChevron({ dir, size = 22 }: { dir: Dir; size?: number }) {
+export function IconChevron({ dir, size = 20 }: { dir: Dir; size?: number }) {
   const rot = [0, 90, 180, 270][dir];
   return (
     <svg className={ic} style={{ transform: `rotate(${rot}deg)` }} width={size} height={size} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
@@ -72,37 +72,44 @@ export function IconChevron({ dir, size = 22 }: { dir: Dir; size?: number }) {
   );
 }
 
-export function LogoMark({ size = 34 }: { size?: number }) {
+export function LogoMark({ size = 38 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden className="shrink-0">
-      <rect x="1" y="1" width="30" height="30" rx="7" fill="#0e2419" stroke="rgba(163,230,53,0.4)" strokeWidth="1.5" />
-      <path d="M8 9h16v5H13v2h11v7H8v-5h11v-2H8z" fill="#a3e635" />
-      <rect x="21.5" y="10.2" width="2.4" height="2.4" fill="#08130d" />
-    </svg>
+    <div
+      style={{ width: size, height: size }}
+      className="shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] shadow-[0_0_20px_rgba(34,211,238,0.4)]"
+    >
+      <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#090e1c]">
+        <svg width={size * 0.65} height={size * 0.65} viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" fill="rgba(34, 211, 238, 0.2)" />
+          <path d="M8 12h8a4 4 0 0 1 0 8H8a4 4 0 0 1-4-4v-2" />
+          <circle cx="14" cy="6" r="1" fill="#ffffff" />
+        </svg>
+      </div>
+    </div>
   );
 }
 
-/* ============================== fireflies ============================== */
+/* ============================== fireflies (cosmic dust) ============================== */
 
-const FLY_COLORS = ["#a3e635", "#43d9bd", "#fbbf24", "#b8ec50"];
+const FLY_COLORS = ["#22d3ee", "#10b981", "#fbbf24", "#f43f5e", "#a855f7"];
 
-export function Fireflies({ count = 14 }: { count?: number }) {
+export function Fireflies({ count = 18 }: { count?: number }) {
   const flies = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {
         const c = FLY_COLORS[i % FLY_COLORS.length];
-        const s = 2 + Math.random() * 3.5;
+        const s = 2.5 + Math.random() * 3.5;
         return {
           id: i,
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
           size: s,
           color: c,
-          dur: `${9 + Math.random() * 10}s`,
+          dur: `${10 + Math.random() * 12}s`,
           delay: `${-Math.random() * 12}s`,
-          x: `${(Math.random() - 0.5) * 140}px`,
-          y: `${-30 - Math.random() * 90}px`,
-          alpha: 0.25 + Math.random() * 0.4,
+          x: `${(Math.random() - 0.5) * 160}px`,
+          y: `${-30 - Math.random() * 100}px`,
+          alpha: 0.3 + Math.random() * 0.45,
         };
       }),
     [count],
@@ -138,8 +145,8 @@ export function Fireflies({ count = 14 }: { count?: number }) {
 export function PanelLabel({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="h-[3px] w-[3px] bg-venom-500" />
-      <span className="text-[10px] font-bold tracking-[0.28em] text-fog-500">{children}</span>
+      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+      <span className="font-arcade text-[11px] font-bold tracking-[0.2em] text-slate-400">{children}</span>
     </div>
   );
 }
@@ -149,16 +156,19 @@ export function SpeedPips({ tickMs, dkey }: { tickMs: number; dkey: DifficultyKe
   const span = cfg.baseMs - cfg.minMs;
   const level = span <= 0 ? 1 : Math.min(5, Math.max(1, 1 + Math.round(((cfg.baseMs - tickMs) / span) * 4)));
   return (
-    <div className="flex items-end gap-1">
+    <div className="flex items-center gap-1.5">
       {[1, 2, 3, 4, 5].map((i) => (
         <span
           key={i}
-          className="h-2.5 w-2"
+          className="h-2 w-4 rounded-full transition-all duration-300"
           style={{
-            transform: "skewX(-14deg)",
-            background: i <= level ? (level >= 4 ? "#ff8a70" : "#a3e635") : "rgba(234,246,238,0.1)",
-            boxShadow: i <= level ? "0 0 8px rgba(163,230,53,0.4)" : "none",
-            transition: "background 200ms ease",
+            background:
+              i <= level
+                ? level >= 4
+                  ? "linear-gradient(to right, #f43f5e, #fb7185)"
+                  : "linear-gradient(to right, #10b981, #22d3ee)"
+                : "rgba(255, 255, 255, 0.08)",
+            boxShadow: i <= level ? "0 0 10px rgba(34, 211, 238, 0.5)" : "none",
           }}
         />
       ))}
@@ -178,37 +188,42 @@ export interface ScorePanelProps {
 
 export function ScorePanel({ score, best, len, mult, tickMs, dkey, isRecord }: ScorePanelProps) {
   return (
-    <div className="panel rounded-lg p-4">
-      <PanelLabel>SCORE</PanelLabel>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span key={score} className="anim-pop inline-block font-arcade text-[26px] leading-none text-venom-400 glow-lime">
+    <div className="panel panel-card rounded-2xl p-5 shadow-xl">
+      <PanelLabel>ĐIỂM SỐ</PanelLabel>
+      <div className="mt-2.5 flex items-baseline gap-2.5">
+        <span
+          key={score}
+          className="anim-pop inline-block font-arcade text-4xl font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+        >
           {score}
         </span>
-        <span className="font-arcade text-[9px] text-fog-500">×{mult}</span>
+        <span className="font-arcade text-xs font-bold text-slate-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md">
+          ×{mult}
+        </span>
         {isRecord && (
-          <span className="anim-blink ml-auto inline-flex items-center gap-1 rounded-sm border border-gild-400/40 bg-gild-400/10 px-1.5 py-1 text-[9px] font-bold tracking-widest text-gild-300">
-            <IconStar size={9} /> NEW BEST
+          <span className="anim-pop ml-auto inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400/15 px-2.5 py-1 text-[10px] font-extrabold tracking-wider text-amber-300 glow-gold">
+            <IconStar size={10} /> KỶ LỤC!
           </span>
         )}
       </div>
 
-      <div className="my-4 h-px bg-gradient-to-r from-venom-500/30 via-pit-line to-transparent" />
+      <div className="my-4 h-px bg-gradient-to-r from-cyan-500/30 via-white/10 to-transparent" />
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <PanelLabel>BEST</PanelLabel>
-          <div className="mt-1.5 flex items-center gap-1.5 font-arcade text-[13px] text-gild-400 glow-gold">
-            <IconTrophy size={12} /> {best}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3">
+          <PanelLabel>KỶ LỤC</PanelLabel>
+          <div className="mt-1.5 flex items-center gap-1.5 font-arcade text-lg font-bold text-amber-300 glow-gold">
+            <IconTrophy size={14} /> {best}
           </div>
         </div>
-        <div>
-          <PanelLabel>LENGTH</PanelLabel>
-          <div className="mt-1.5 font-arcade text-[13px] text-mint-300 glow-mint">{len}</div>
+        <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3">
+          <PanelLabel>CHIỀU DÀI</PanelLabel>
+          <div className="mt-1.5 font-arcade text-lg font-bold text-cyan-300 glow-mint">{len}</div>
         </div>
       </div>
 
-      <div className="mt-4">
-        <PanelLabel>VELOCITY</PanelLabel>
+      <div className="mt-4 rounded-xl bg-white/[0.03] border border-white/5 p-3">
+        <PanelLabel>TỐC ĐỘ</PanelLabel>
         <div className="mt-2">
           <SpeedPips tickMs={tickMs} dkey={dkey} />
         </div>
@@ -229,7 +244,7 @@ export interface DiffPickerProps {
 export function DiffPicker({ value, onSelect, disabled, compact }: DiffPickerProps) {
   if (compact) {
     return (
-      <div className={`flex gap-1.5 ${disabled ? "pointer-events-none opacity-45" : ""}`} role="group" aria-label="Difficulty">
+      <div className={`flex gap-2 ${disabled ? "pointer-events-none opacity-45" : ""}`} role="group" aria-label="Difficulty">
         {DIFF_ORDER.map((k, i) => {
           const cfg = DIFFICULTIES[k];
           const active = value === k;
@@ -238,14 +253,14 @@ export function DiffPicker({ value, onSelect, disabled, compact }: DiffPickerPro
               key={k}
               type="button"
               onClick={() => onSelect(k)}
-              className={`btn-arcade no-tap-highlight flex-1 rounded-md border px-2 py-2 font-arcade text-[8px] leading-relaxed ${
+              className={`btn-arcade no-tap-highlight flex-1 rounded-xl border py-2.5 px-2 font-arcade text-[11px] font-bold transition-all cursor-pointer ${
                 active
-                  ? "border-venom-500/70 bg-venom-500/15 text-venom-300 shadow-[0_0_18px_-4px_rgba(163,230,53,0.5)]"
-                  : "border-pit-line bg-pit-800/60 text-fog-400 hover:border-fog-500/50 hover:text-fog-100"
+                  ? "border-cyan-400/80 bg-gradient-to-b from-cyan-500/25 to-cyan-500/10 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                  : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
               }`}
             >
               {cfg.name}
-              <span className={`ml-1 ${active ? "text-gild-300" : "text-fog-500"}`}>{cfg.tag}</span>
+              <span className={`ml-1 text-[10px] ${active ? "text-amber-300" : "text-slate-500"}`}>{cfg.tag}</span>
               <span className="sr-only">, press {i + 1}</span>
             </button>
           );
@@ -254,7 +269,7 @@ export function DiffPicker({ value, onSelect, disabled, compact }: DiffPickerPro
     );
   }
   return (
-    <div className={`flex flex-col gap-2 ${disabled ? "pointer-events-none opacity-45" : ""}`} role="group" aria-label="Difficulty">
+    <div className={`flex flex-col gap-2.5 ${disabled ? "pointer-events-none opacity-45" : ""}`} role="group" aria-label="Difficulty">
       {DIFF_ORDER.map((k, i) => {
         const cfg = DIFFICULTIES[k];
         const active = value === k;
@@ -263,27 +278,30 @@ export function DiffPicker({ value, onSelect, disabled, compact }: DiffPickerPro
             key={k}
             type="button"
             onClick={() => onSelect(k)}
-            className={`btn-arcade no-tap-highlight group relative overflow-hidden rounded-md border px-3 py-2.5 text-left ${
+            className={`btn-arcade no-tap-highlight group relative overflow-hidden rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
               active
-                ? "border-venom-500/60 bg-venom-500/10"
-                : "border-pit-line bg-pit-800/50 hover:border-fog-500/40 hover:bg-pit-700/50"
+                ? "border-cyan-400/70 bg-gradient-to-r from-cyan-500/15 via-transparent to-transparent shadow-[0_0_20px_rgba(6,182,212,0.2)]"
+                : "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]"
             }`}
           >
             <span
-              className="absolute inset-y-0 left-0 w-[3px] transition-opacity"
+              className="absolute inset-y-0 left-0 w-1 transition-opacity"
               style={{ background: cfg.hue, opacity: active ? 1 : 0 }}
             />
             <span className="flex items-center gap-2">
-              <span className={`font-arcade text-[10px] ${active ? "text-venom-300" : "text-fog-100"}`}>{cfg.name}</span>
+              <span className={`font-arcade text-sm font-bold ${active ? "text-cyan-300" : "text-slate-200"}`}>{cfg.name}</span>
               <span
-                className="rounded-sm px-1 py-0.5 text-[9px] font-bold"
-                style={{ background: active ? "rgba(251,191,36,0.16)" : "rgba(234,246,238,0.06)", color: active ? "#ffe08a" : "#9cb8a6" }}
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                style={{
+                  background: active ? "rgba(250,204,21,0.2)" : "rgba(255,255,255,0.06)",
+                  color: active ? "#fde047" : "#94a3b8",
+                }}
               >
-                {cfg.tag} SCORE
+                {cfg.tag} ĐIỂM
               </span>
-              <span className="ml-auto text-[10px] text-fog-500">{i + 1}</span>
+              <span className="ml-auto text-[11px] font-medium text-slate-500">Phím {i + 1}</span>
             </span>
-            <span className="mt-1 block text-xs text-fog-400">{cfg.desc}</span>
+            <span className="mt-1 block text-xs text-slate-400">{cfg.desc}</span>
           </button>
         );
       })}
@@ -295,31 +313,31 @@ export function DiffPicker({ value, onSelect, disabled, compact }: DiffPickerPro
 
 export function ControlsGuide() {
   const rows: { keys: string[]; label: string }[] = [
-    { keys: ["↑↓←→", "WASD"], label: "STEER" },
-    { keys: ["SPACE"], label: "PAUSE / RESUME" },
-    { keys: ["R"], label: "RESTART" },
-    { keys: ["1·2·3"], label: "DIFFICULTY" },
-    { keys: ["M"], label: "SOUND" },
+    { keys: ["↑↓←→", "WASD"], label: "ĐIỀU HƯỚNG" },
+    { keys: ["SPACE"], label: "TẠM DỪNG / TIẾP TỤC" },
+    { keys: ["R"], label: "CHƠI LẠI" },
+    { keys: ["1·2·3"], label: "CHẾ ĐỘ CHƠI" },
+    { keys: ["M"], label: "BẬT / TẮT ÂM" },
   ];
   return (
-    <div className="panel rounded-lg p-4">
-      <PanelLabel>CONTROLS</PanelLabel>
+    <div className="panel panel-card rounded-2xl p-5 shadow-xl">
+      <PanelLabel>HƯỚNG DẪN ĐIỀU KHIỂN</PanelLabel>
       <ul className="mt-3 flex flex-col gap-2.5">
         {rows.map((r) => (
           <li key={r.label} className="flex items-center justify-between gap-3">
-            <span className="flex gap-1">
+            <span className="flex gap-1.5">
               {r.keys.map((k) => (
                 <kbd key={k} className="kbd">
                   {k}
                 </kbd>
               ))}
             </span>
-            <span className="text-[11px] font-semibold tracking-wider text-fog-400">{r.label}</span>
+            <span className="text-xs font-semibold text-slate-300">{r.label}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-3 border-t border-pit-line pt-3 text-[11px] leading-relaxed text-fog-500">
-        On touch screens, swipe the pit to steer — or use the pad.
+      <p className="mt-3.5 border-t border-white/10 pt-3 text-xs leading-relaxed text-slate-400">
+        Trên màn hình cảm ứng: Vuốt trên sân để quẹo hoặc dùng cụm phím điều khiển ảo.
       </p>
     </div>
   );
@@ -335,25 +353,25 @@ export interface DPadProps {
 
 export function DPad({ onDir, onCenter, centerIcon }: DPadProps) {
   const btn =
-    "btn-arcade no-tap-highlight flex h-14 w-14 items-center justify-center rounded-lg border border-pit-line bg-pit-800/80 text-fog-100 active:border-venom-500/60 active:bg-venom-500/20 active:text-venom-300";
+    "btn-arcade no-tap-highlight flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/5 text-slate-200 active:border-cyan-400/80 active:bg-cyan-500/20 active:text-cyan-300 backdrop-blur-md shadow-lg";
   const press = (d: Dir) => (e: React.PointerEvent) => {
     e.preventDefault();
     onDir(d);
   };
   return (
-    <div className="grid select-none grid-cols-3 gap-1.5" style={{ touchAction: "manipulation" }}>
+    <div className="grid select-none grid-cols-3 gap-2" style={{ touchAction: "manipulation" }}>
       <span />
       <button type="button" aria-label="Steer up" className={btn} onPointerDown={press(0)}>
-        <IconChevron dir={0} />
+        <IconChevron dir={0} size={22} />
       </button>
       <span />
       <button type="button" aria-label="Steer left" className={btn} onPointerDown={press(3)}>
-        <IconChevron dir={3} />
+        <IconChevron dir={3} size={22} />
       </button>
       <button
         type="button"
         aria-label="Pause or resume"
-        className={`${btn} border-venom-500/30 bg-pit-700/80 text-venom-400`}
+        className={`${btn} border-cyan-400/50 bg-cyan-500/15 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.3)]`}
         onPointerDown={(e) => {
           e.preventDefault();
           onCenter();
@@ -362,11 +380,11 @@ export function DPad({ onDir, onCenter, centerIcon }: DPadProps) {
         {centerIcon === "play" ? <IconPlay size={18} /> : centerIcon === "pause" ? <IconPause size={18} /> : <IconRestart size={18} />}
       </button>
       <button type="button" aria-label="Steer right" className={btn} onPointerDown={press(1)}>
-        <IconChevron dir={1} />
+        <IconChevron dir={1} size={22} />
       </button>
       <span />
       <button type="button" aria-label="Steer down" className={btn} onPointerDown={press(2)}>
-        <IconChevron dir={2} />
+        <IconChevron dir={2} size={22} />
       </button>
       <span />
     </div>

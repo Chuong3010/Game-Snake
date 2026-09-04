@@ -14,6 +14,7 @@ import {
   autopilotSteer,
   respawnFood,
   spawnBonus,
+  spawnObstacle,
   spawnParticles,
   addFloater,
   type Dir,
@@ -160,27 +161,81 @@ export function useSnakeGame(): SnakeGame {
   const eatApple = useCallback(() => {
     const sim = simRef.current;
     const cfg = diffRef.current;
-    const pts = APPLE_POINTS * cfg.mult;
-    scoreRef.current += pts;
-    setScore(scoreRef.current);
+    // Scale points by difficulty multiplier: Chill = 10, Classic = 20, Blitz = 30
+    let pts = APPLE_POINTS * cfg.mult;
+    
+    // Ensure the score lands exactly on 990 without overshooting
+    if (scoreRef.current < 990 && scoreRef.current + pts > 990) {
+      pts = 990 - scoreRef.current;
+    } else if (scoreRef.current >= 990) {
+      pts = 0;
+    }
+
+    scoreRef.current = Math.min(990, scoreRef.current + pts);
+    const curScore = scoreRef.current;
+    setScore(curScore);
     sim.grow += 1;
     sim.apples += 1;
-    sim.tickMs = Math.max(cfg.minMs, sim.tickMs * 0.985);
+
+    // Gradual difficulty / speed ramp-up
+    if (curScore < 850) {
+      sim.tickMs = Math.max(cfg.minMs, sim.tickMs * 0.985);
+    } else if (curScore < 950) {
+      // 850 - 950: Danger Zone speeds up significantly
+      sim.tickMs = Math.max(54, sim.tickMs * 0.96);
+    } else {
+      // 950 - 990: Climax speed
+      sim.tickMs = Math.max(46, sim.tickMs * 0.94);
+    }
     setTickMs(sim.tickMs);
     setLen(sim.len + sim.grow);
+
     const f = sim.food;
     spawnParticles(sim, f.x + 0.5, f.y + 0.5, ["#f95f62", "#ff8a70", "#b8ec50", "#eaf6ee"], 16, 5.5, 4);
     addFloater(sim, f.x + 0.5, f.y + 0.2, `+${pts}`, "#d3f56e");
     sfx.eat();
+
+    // 850 Milestone: Activate Danger Zone + Natural Obstacles appear
+    if (curScore >= 850 && !sim.dangerActive) {
+      sim.dangerActive = true;
+      sim.shake = 0.7;
+      sim.flash = 0.5;
+      spawnObstacle(sim, 3);
+      addFloater(sim, COLS / 2, 3, "⚠️ THỬ THÁCH 1000 ĐIỂM!", "#f95f62");
+      addFloater(sim, COLS / 2, 4.5, "CHƯỚNG NGẠI VẬT XUẤT HIỆN!", "#fbbf24");
+    } else if (curScore >= 850 && curScore < 980 && curScore % 30 === 0) {
+      // Gradually spawn 1 more obstacle every 30 points
+      if (sim.obstacles.length < 7) {
+        spawnObstacle(sim, 1);
+        addFloater(sim, COLS / 2, 3, "⚠️ ĐỊA HÌNH SỤP ĐỔ!", "#ff8a70");
+      }
+    }
+
+    // 990 Milestone: Grand Golden Apple for the fatal trap setup
+    if (curScore >= 990) {
+      sim.isGoldenApple = true;
+      sim.shake = 1.0;
+      addFloater(sim, COLS / 2, 3, "👑 TÁO HOÀNG KIM 1000 ĐIỂM!", "#fbbf24");
+      addFloater(sim, COLS / 2, 4.5, "🔥 CHỈ CÒN 10 ĐIỂM ĐỂ THẮNG!", "#ffe08a");
+    }
+
     respawnFood(sim);
-    if (sim.apples % BONUS_EVERY === 0) spawnBonus(sim, performance.now());
+
+    // Only spawn bonus stars before 800 points so they don't jump past 990
+    if (curScore < 800 && sim.apples % BONUS_EVERY === 0) {
+      spawnBonus(sim, performance.now());
+    }
   }, []);
 
   const eatBonus = useCallback(() => {
     const sim = simRef.current;
     const cfg = diffRef.current;
     if (!sim.bonus) return;
-    const pts = BONUS_POINTS * cfg.mult;
+    let pts = BONUS_POINTS * cfg.mult;
+    // Don't let bonus overshoot past 840
+    if (scoreRef.current + pts > 840) {
+      pts = Math.max(0, 840 - scoreRef.current);
+    }
     scoreRef.current += pts;
     setScore(scoreRef.current);
     sim.grow += 2;
@@ -209,15 +264,54 @@ export function useSnakeGame(): SnakeGame {
     const nx = head.x + DX[sim.dir];
     const ny = head.y + DY[sim.dir];
 
+    // Wall collision
     if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) {
       die();
       return;
     }
+
+    // Body collision
     const checkLen = sim.len - (sim.grow > 0 ? 0 : 1);
     for (let i = 0; i < checkLen && i < sim.trail.length; i++) {
       if (sim.trail[i].x === nx && sim.trail[i].y === ny) {
         die();
         return;
+      }
+    }
+
+    // 990 FATAL AMBUSH TRAP:
+    // When score is 990, the final 1000-pt apple is on the board.
+    // When the snake goes to eat the apple (nx, ny is on the food cell or 1 cell away) or after a few steps:
+    // A falling boulder trap slams into nx, ny with violent screen shake and rock debris!
+    if (scoreRef.current >= 990 && !sim.trapTriggered && !sim.autopilot) {
+      sim.stepsAt990 = (sim.stepsAt990 || 0) + 1;
+      const isEnteringFood = nx === sim.food.x && ny === sim.food.y;
+      const distToFood = Math.abs(nx - sim.food.x) + Math.abs(ny - sim.food.y);
+
+      if (isEnteringFood || distToFood <= 1 || sim.stepsAt990 >= 10) {
+        sim.trapTriggered = true;
+        const trapX = nx;
+        const trapY = ny;
+        sim.obstacles.push({ x: trapX, y: trapY, createdAt: performance.now() });
+        sim.trapObstacle = { x: trapX, y: trapY };
+        spawnParticles(sim, trapX + 0.5, trapY + 0.5, ["#f95f62", "#ff8a70", "#94a3b8", "#fbbf24", "#ffffff"], 40, 10, 5);
+        addFloater(sim, trapX + 0.5, trapY - 0.5, "💥 ĐÁ SỤP BẤT NGỜ!", "#f95f62");
+        sim.shake = 1.8;
+        sim.flash = 0.8;
+      }
+    }
+
+    // Obstacle collision
+    if (sim.obstacles && sim.obstacles.length > 0) {
+      for (const ob of sim.obstacles) {
+        if (ob.x === nx && ob.y === ny) {
+          spawnParticles(sim, nx + 0.5, ny + 0.5, ["#94a3b8", "#f95f62", "#fbbf24", "#e2e8f0"], 30, 8, 4);
+          addFloater(sim, nx + 0.5, ny, "💥 VA PHẢI ĐÁ!", "#f95f62");
+          sim.shake = 1.5;
+          sfx.crash();
+          die();
+          return;
+        }
       }
     }
 
@@ -403,6 +497,26 @@ export function useSnakeGame(): SnakeGame {
       if (k === "1") api.setDifficulty("chill");
       if (k === "2") api.setDifficulty("classic");
       if (k === "3") api.setDifficulty("blitz");
+
+      // Secret dev shortcuts for testing
+      if (k === "9" && st === "playing") {
+        scoreRef.current = 840;
+        setScore(840);
+        addFloater(simRef.current, COLS / 2, 4, "⚡ TEST: 840 ĐIỂM", "#fbbf24");
+        return;
+      }
+      if (k === "0" && st === "playing") {
+        const mult = diffRef.current.mult;
+        const testTarget = 990 - APPLE_POINTS * mult;
+        scoreRef.current = testTarget;
+        setScore(testTarget);
+        simRef.current.dangerActive = true;
+        if (simRef.current.obstacles.length === 0) {
+          spawnObstacle(simRef.current, 3);
+        }
+        addFloater(simRef.current, COLS / 2, 4, `👑 TEST: ${testTarget} ĐIỂM`, "#fbbf24");
+        return;
+      }
     };
 
     const onHide = () => {

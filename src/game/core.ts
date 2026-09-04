@@ -45,6 +45,10 @@ export interface Bonus {
   expiresAt: number; // performance.now() ms
 }
 
+export interface Obstacle extends Pt {
+  createdAt?: number;
+}
+
 export interface Sim {
   trail: Pt[]; // [head, ...body]; invariant: trail.length === len + 1
   len: number; // snake length in cells
@@ -63,6 +67,12 @@ export interface Sim {
   dead: boolean;
   deathAt: number;
   autopilot: boolean;
+  obstacles: Obstacle[];
+  dangerActive: boolean;
+  trapTriggered: boolean;
+  isGoldenApple: boolean;
+  trapObstacle: Pt | null;
+  stepsAt990: number;
 }
 
 export type DifficultyKey = "chill" | "classic" | "blitz";
@@ -117,17 +127,23 @@ export type UiState = "idle" | "countdown" | "playing" | "paused" | "over" | "wo
 
 const rand = (n: number) => Math.floor(Math.random() * n);
 
-function freeCell(sim: Pick<Sim, "trail" | "len">, avoid: Pt[]): Pt | null {
+function freeCell(sim: Pick<Sim, "trail" | "len"> & { obstacles?: Pt[] }, avoid: Pt[]): Pt | null {
   const occupied = new Set<number>();
   for (let i = 0; i < sim.len && i < sim.trail.length; i++) {
     const p = sim.trail[i];
     occupied.add(p.y * COLS + p.x);
   }
+  if (sim.obstacles) {
+    for (const ob of sim.obstacles) occupied.add(ob.y * COLS + ob.x);
+  }
   for (const a of avoid) occupied.add(a.y * COLS + a.x);
   if (occupied.size >= CELLS) return null;
   let p: Pt;
+  let tries = 0;
   do {
     p = { x: rand(COLS), y: rand(ROWS) };
+    tries++;
+    if (tries > 600) return null;
   } while (occupied.has(p.y * COLS + p.x));
   return p;
 }
@@ -155,6 +171,12 @@ export function makeSim(autopilot: boolean, cfg: DifficultyCfg): Sim {
     dead: false,
     deathAt: 0,
     autopilot,
+    obstacles: [],
+    dangerActive: false,
+    trapTriggered: false,
+    isGoldenApple: false,
+    trapObstacle: null,
+    stepsAt990: 0,
   };
   const f = freeCell(sim, []);
   if (f) sim.food = f;
@@ -164,12 +186,35 @@ export function makeSim(autopilot: boolean, cfg: DifficultyCfg): Sim {
 export function respawnFood(sim: Sim): void {
   const avoid: Pt[] = [];
   if (sim.bonus) avoid.push(sim.bonus.pos);
+  if (sim.obstacles) avoid.push(...sim.obstacles);
   const f = freeCell(sim, avoid);
   if (f) sim.food = f;
 }
 
+export function spawnObstacle(sim: Sim, count = 1): void {
+  const head = sim.trail[0];
+  for (let c = 0; c < count; c++) {
+    const avoid: Pt[] = [sim.food];
+    if (sim.bonus) avoid.push(sim.bonus.pos);
+    if (head) {
+      for (let dx = -2; dx <= 2; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+          avoid.push({ x: head.x + dx, y: head.y + dy });
+        }
+      }
+    }
+    const cell = freeCell(sim, avoid);
+    if (cell) {
+      sim.obstacles.push({ x: cell.x, y: cell.y, createdAt: performance.now() });
+      spawnParticles(sim, cell.x + 0.5, cell.y + 0.5, ["#ff8a70", "#fbbf24", "#eaf6ee"], 12, 4, 3);
+    }
+  }
+}
+
 export function spawnBonus(sim: Sim, now: number): void {
-  const b = freeCell(sim, [sim.food]);
+  const avoid: Pt[] = [sim.food];
+  if (sim.obstacles) avoid.push(...sim.obstacles);
+  const b = freeCell(sim, avoid);
   if (b) sim.bonus = { pos: b, expiresAt: now + BONUS_TTL_MS };
 }
 
@@ -219,6 +264,14 @@ export function autopilotSteer(sim: Sim): void {
       if (sim.trail[i].x === nx && sim.trail[i].y === ny) {
         hits = true;
         break;
+      }
+    }
+    if (!hits && sim.obstacles) {
+      for (const ob of sim.obstacles) {
+        if (ob.x === nx && ob.y === ny) {
+          hits = true;
+          break;
+        }
       }
     }
     if (hits) continue;

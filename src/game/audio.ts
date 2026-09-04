@@ -85,6 +85,11 @@ export const sfx = {
     blip({ freq: 320, end: 52, dur: 0.5, type: "sawtooth", vol: 0.06 });
     blip({ freq: 160, end: 40, dur: 0.55, type: "square", vol: 0.04, delay: 0.05 });
   },
+  crash(): void {
+    blip({ freq: 240, end: 35, dur: 0.65, type: "sawtooth", vol: 0.09 });
+    blip({ freq: 130, end: 28, dur: 0.7, type: "square", vol: 0.08, delay: 0.025 });
+    blip({ freq: 80, end: 20, dur: 0.75, type: "triangle", vol: 0.09, delay: 0.05 });
+  },
   win(): void {
     [523, 659, 784, 1046].forEach((f, i) =>
       blip({ freq: f, dur: 0.12, type: "triangle", vol: 0.05, delay: i * 0.09 }),
