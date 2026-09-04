@@ -73,6 +73,8 @@ export interface Sim {
   isGoldenApple: boolean;
   trapObstacle: Pt | null;
   stepsAt990: number;
+  godMode?: boolean;
+  reached1000?: boolean;
 }
 
 export type DifficultyKey = "chill" | "classic" | "blitz";
@@ -177,6 +179,8 @@ export function makeSim(autopilot: boolean, cfg: DifficultyCfg): Sim {
     isGoldenApple: false,
     trapObstacle: null,
     stepsAt990: 0,
+    godMode: false,
+    reached1000: false,
   };
   const f = freeCell(sim, []);
   if (f) sim.food = f;

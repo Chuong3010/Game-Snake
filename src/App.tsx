@@ -75,6 +75,18 @@ export default function App() {
     else if (g.state === "playing" || g.state === "paused") g.togglePause();
   };
 
+  const [logoClicks, setLogoClicks] = useState(0);
+  const handleLogoClick = () => {
+    const next = logoClicks + 1;
+    if (next >= 3) {
+      setLogoClicks(0);
+      g.toggleGodMode();
+    } else {
+      setLogoClicks(next);
+      window.setTimeout(() => setLogoClicks(0), 1000);
+    }
+  };
+
   return (
     <div className="no-tap-highlight relative flex min-h-dvh flex-col overflow-hidden font-body text-slate-100 bg-[#060913]">
       {/* ---------- ambient cosmic background ---------- */}
@@ -101,7 +113,11 @@ export default function App() {
 
       {/* ---------- header ---------- */}
       <header className="mx-auto flex w-full max-w-[1100px] items-center justify-between gap-4 px-4 pb-3 pt-5">
-        <div className="flex items-center gap-3.5">
+        <div
+          className="flex items-center gap-3.5 cursor-pointer select-none transition-transform active:scale-95"
+          onClick={handleLogoClick}
+          title="Serpentine"
+        >
           <LogoMark size={42} />
           <div>
             <div className="font-arcade text-lg font-black leading-none tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">
@@ -305,7 +321,7 @@ export default function App() {
       {/* ---------- footer ---------- */}
       <footer className="mx-auto w-full max-w-[1100px] px-4 pb-5 pt-2">
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3 text-[10px] font-semibold tracking-[0.25em] text-slate-500">
-          <span>SERPENTINE · ĂN TÁO · LỚN LÊN · TỬ THẦN 990</span>
+          <span>SERPENTINE · ĂN TÁO · LỚN LÊN · CHINH PHỤC 1000 ĐIỂM</span>
           <span className="text-slate-500">KỶ LỤC LƯU TRỰC TIẾP TRÊN TRÌNH DUYỆT NÀY</span>
         </div>
       </footer>

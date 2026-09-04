@@ -74,6 +74,9 @@ export interface SnakeGame {
   pressDirection: (d: Dir) => void;
   onBoardPointerDown: (e: React.PointerEvent) => void;
   onBoardPointerUp: (e: React.PointerEvent) => void;
+  godMode: boolean;
+  toggleGodMode: () => void;
+  trigger1020Cheat: () => void;
 }
 
 export function useSnakeGame(): SnakeGame {
@@ -91,6 +94,7 @@ export function useSnakeGame(): SnakeGame {
   const [bestMap, setBestMap] = useState<BestMap>(loadBest);
   const [justSetRecord, setJustSetRecord] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
+  const [godMode, setGodMode] = useState(false);
 
   const simRef = useRef<Sim>(makeSim(true, DIFFICULTIES.classic));
   const viewRef = useRef<View>({ w: 0, h: 0, dpr: 1 });
@@ -98,12 +102,14 @@ export function useSnakeGame(): SnakeGame {
   const diffRef = useRef(DIFFICULTIES.classic);
   const scoreRef = useRef(0);
   const bestRef = useRef(bestMap);
+  const godModeRef = useRef(false);
   const timeouts = useRef<number[]>([]);
   const pointer = useRef<{ x: number; y: number; t: number } | null>(null);
 
   stateRef.current = state;
   diffRef.current = DIFFICULTIES[difficulty];
   bestRef.current = bestMap;
+  godModeRef.current = godMode;
 
   const later = useCallback((fn: () => void, ms: number) => {
     timeouts.current.push(window.setTimeout(fn, ms));
@@ -118,10 +124,41 @@ export function useSnakeGame(): SnakeGame {
 
   const resetSim = useCallback((autopilot: boolean) => {
     simRef.current = makeSim(autopilot, diffRef.current);
+    simRef.current.godMode = godModeRef.current;
     scoreRef.current = 0;
     setScore(0);
     setLen(3);
     setTickMs(diffRef.current.baseMs);
+  }, []);
+
+  const toggleGodMode = useCallback(() => {
+    setGodMode((prev) => {
+      const next = !prev;
+      godModeRef.current = next;
+      simRef.current.godMode = next;
+      if (next) {
+        addFloater(simRef.current, COLS / 2, 4, "🛡️ VƯỢT BẪY 1000: BẬT", "#10b981");
+        simRef.current.shake = 0.5;
+        sfx.eat();
+      } else {
+        addFloater(simRef.current, COLS / 2, 4, "🛡️ VƯỢT BẪY 1000: TẮT", "#94a3b8");
+      }
+      return next;
+    });
+  }, []);
+
+  const trigger1020Cheat = useCallback(() => {
+    const sim = simRef.current;
+    sim.godMode = true;
+    godModeRef.current = true;
+    setGodMode(true);
+    scoreRef.current = 1020;
+    setScore(1020);
+    sim.obstacles = [];
+    spawnParticles(sim, COLS / 2, ROWS / 2, ["#fbbf24", "#38bdf8", "#10b981", "#ffffff"], 50, 8, 3);
+    addFloater(sim, COLS / 2, 3.5, "🏆 VƯỢT 1000 ĐIỂM: 1020 PTS!", "#fbbf24");
+    addFloater(sim, COLS / 2, 4.8, "👑 BẬC THẦY RẮN SĂN MỒI!", "#38bdf8");
+    sfx.win();
   }, []);
 
   const finishRun = useCallback(
@@ -164,14 +201,19 @@ export function useSnakeGame(): SnakeGame {
     // Scale points by difficulty multiplier: Chill = 10, Classic = 20, Blitz = 30
     let pts = APPLE_POINTS * cfg.mult;
     
-    // Ensure the score lands exactly on 990 without overshooting
-    if (scoreRef.current < 990 && scoreRef.current + pts > 990) {
-      pts = 990 - scoreRef.current;
-    } else if (scoreRef.current >= 990) {
-      pts = 0;
+    if (!sim.godMode) {
+      // Ensure the score lands exactly on 990 without overshooting for trap setup
+      if (scoreRef.current < 990 && scoreRef.current + pts > 990) {
+        pts = 990 - scoreRef.current;
+      } else if (scoreRef.current >= 990) {
+        pts = 0;
+      }
+      scoreRef.current = Math.min(990, scoreRef.current + pts);
+    } else {
+      // GOD MODE / NORMAL PLAY: Bypass trap and allow scoring past 1000+!
+      scoreRef.current += pts;
     }
 
-    scoreRef.current = Math.min(990, scoreRef.current + pts);
     const curScore = scoreRef.current;
     setScore(curScore);
     sim.grow += 1;
@@ -183,9 +225,12 @@ export function useSnakeGame(): SnakeGame {
     } else if (curScore < 950) {
       // 850 - 950: Danger Zone speeds up significantly
       sim.tickMs = Math.max(54, sim.tickMs * 0.96);
-    } else {
+    } else if (curScore < 1000) {
       // 950 - 990: Climax speed
       sim.tickMs = Math.max(46, sim.tickMs * 0.94);
+    } else {
+      // Past 1000: smooth comfortable speed
+      sim.tickMs = Math.max(56, sim.tickMs);
     }
     setTickMs(sim.tickMs);
     setLen(sim.len + sim.grow);
@@ -211,18 +256,32 @@ export function useSnakeGame(): SnakeGame {
       }
     }
 
-    // 990 Milestone: Grand Golden Apple for the fatal trap setup
-    if (curScore >= 990) {
+    // 990 Milestone:
+    if (!sim.godMode && curScore >= 990) {
       sim.isGoldenApple = true;
       sim.shake = 1.0;
       addFloater(sim, COLS / 2, 3, "👑 TÁO HOÀNG KIM 1000 ĐIỂM!", "#fbbf24");
       addFloater(sim, COLS / 2, 4.5, "🔥 CHỈ CÒN 10 ĐIỂM ĐỂ THẮNG!", "#ffe08a");
+    } else if (sim.godMode && curScore >= 990 && curScore < 1000) {
+      sim.isGoldenApple = true;
+      addFloater(sim, COLS / 2, 3, "👑 TÁO VÀNG VƯỢT MỐC!", "#fbbf24");
+    }
+
+    // 1000 Milestone: Grand Champion Triumph!
+    if (curScore >= 1000 && !sim.reached1000) {
+      sim.reached1000 = true;
+      sim.shake = 1.2;
+      sim.flash = 0.4;
+      spawnParticles(sim, COLS / 2, ROWS / 2, ["#fbbf24", "#38bdf8", "#10b981", "#ffffff"], 60, 10, 3);
+      addFloater(sim, COLS / 2, 3, "🏆 KỶ LỤC 1000 ĐIỂM!", "#fbbf24");
+      addFloater(sim, COLS / 2, 4.5, "👑 HUYỀN THOẠI RẮN SĂN MỒI!", "#38bdf8");
+      sfx.win();
     }
 
     respawnFood(sim);
 
-    // Only spawn bonus stars before 800 points so they don't jump past 990
-    if (curScore < 800 && sim.apples % BONUS_EVERY === 0) {
+    // Bonus stars:
+    if ((curScore < 800 || sim.godMode) && sim.apples % BONUS_EVERY === 0) {
       spawnBonus(sim, performance.now());
     }
   }, []);
@@ -232,8 +291,7 @@ export function useSnakeGame(): SnakeGame {
     const cfg = diffRef.current;
     if (!sim.bonus) return;
     let pts = BONUS_POINTS * cfg.mult;
-    // Don't let bonus overshoot past 840
-    if (scoreRef.current + pts > 840) {
+    if (!sim.godMode && scoreRef.current + pts > 840) {
       pts = Math.max(0, 840 - scoreRef.current);
     }
     scoreRef.current += pts;
@@ -280,10 +338,8 @@ export function useSnakeGame(): SnakeGame {
     }
 
     // 990 FATAL AMBUSH TRAP:
-    // When score is 990, the final 1000-pt apple is on the board.
-    // When the snake goes to eat the apple (nx, ny is on the food cell or 1 cell away) or after a few steps:
-    // A falling boulder trap slams into nx, ny with violent screen shake and rock debris!
-    if (scoreRef.current >= 990 && !sim.trapTriggered && !sim.autopilot) {
+    // Only triggers in normal mode (not in godMode and not in autopilot)
+    if (!sim.godMode && scoreRef.current >= 990 && !sim.trapTriggered && !sim.autopilot) {
       sim.stepsAt990 = (sim.stepsAt990 || 0) + 1;
       const isEnteringFood = nx === sim.food.x && ny === sim.food.y;
       const distToFood = Math.abs(nx - sim.food.x) + Math.abs(ny - sim.food.y);
@@ -303,14 +359,25 @@ export function useSnakeGame(): SnakeGame {
 
     // Obstacle collision
     if (sim.obstacles && sim.obstacles.length > 0) {
-      for (const ob of sim.obstacles) {
+      for (let i = 0; i < sim.obstacles.length; i++) {
+        const ob = sim.obstacles[i];
         if (ob.x === nx && ob.y === ny) {
-          spawnParticles(sim, nx + 0.5, ny + 0.5, ["#94a3b8", "#f95f62", "#fbbf24", "#e2e8f0"], 30, 8, 4);
-          addFloater(sim, nx + 0.5, ny, "💥 VA PHẢI ĐÁ!", "#f95f62");
-          sim.shake = 1.5;
-          sfx.crash();
-          die();
-          return;
+          if (sim.godMode) {
+            // Smash rock in God Mode
+            sim.obstacles.splice(i, 1);
+            spawnParticles(sim, nx + 0.5, ny + 0.5, ["#fbbf24", "#38bdf8", "#10b981", "#ffffff"], 25, 7, 3);
+            addFloater(sim, nx + 0.5, ny, "⚡ PHÁ ĐÁ!", "#38bdf8");
+            sim.shake = 0.5;
+            sfx.eat();
+            break;
+          } else {
+            spawnParticles(sim, nx + 0.5, ny + 0.5, ["#94a3b8", "#f95f62", "#fbbf24", "#e2e8f0"], 30, 8, 4);
+            addFloater(sim, nx + 0.5, ny, "💥 VA PHẢI ĐÁ!", "#f95f62");
+            sim.shake = 1.5;
+            sfx.crash();
+            die();
+            return;
+          }
         }
       }
     }
@@ -442,8 +509,28 @@ export function useSnakeGame(): SnakeGame {
 
   /* ------------------------------------------------ keyboard + blur */
 
-  const apiRef = useRef({ start, togglePause, restart, toMenu, setDifficulty, toggleMute, pressDirection });
-  apiRef.current = { start, togglePause, restart, toMenu, setDifficulty, toggleMute, pressDirection };
+  const apiRef = useRef({
+    start,
+    togglePause,
+    restart,
+    toMenu,
+    setDifficulty,
+    toggleMute,
+    pressDirection,
+    toggleGodMode,
+    trigger1020Cheat,
+  });
+  apiRef.current = {
+    start,
+    togglePause,
+    restart,
+    toMenu,
+    setDifficulty,
+    toggleMute,
+    pressDirection,
+    toggleGodMode,
+    trigger1020Cheat,
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -498,7 +585,15 @@ export function useSnakeGame(): SnakeGame {
       if (k === "2") api.setDifficulty("classic");
       if (k === "3") api.setDifficulty("blitz");
 
-      // Secret dev shortcuts for testing
+      // Secret shortcuts
+      if (k === "g" || k === "G") {
+        api.toggleGodMode();
+        return;
+      }
+      if (k === "8" && st === "playing") {
+        api.trigger1020Cheat();
+        return;
+      }
       if (k === "9" && st === "playing") {
         scoreRef.current = 840;
         setScore(840);
@@ -661,5 +756,8 @@ export function useSnakeGame(): SnakeGame {
     pressDirection,
     onBoardPointerDown,
     onBoardPointerUp,
+    godMode,
+    toggleGodMode,
+    trigger1020Cheat,
   };
 }

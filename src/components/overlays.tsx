@@ -104,13 +104,34 @@ export function BoardOverlay(p: OverlayProps) {
         )}
         <span
           className={`anim-rise font-arcade text-3xl font-black leading-tight md:text-4xl ${
-            won ? "text-emerald-400 glow-lime" : p.score === 990 ? "text-amber-300 glow-gold" : "text-rose-500 glow-coral"
+            won
+              ? "text-emerald-400 glow-lime"
+              : p.score >= 1000
+              ? "text-amber-300 glow-gold"
+              : p.score === 990
+              ? "text-amber-300 glow-gold"
+              : "text-rose-500 glow-coral"
           }`}
         >
-          {won ? "CHIẾN THẮNG!" : p.score === 990 ? "ÔI TIẾC QUÁ! 990 ĐIỂM! 😭" : "GAME OVER"}
+          {won
+            ? "CHIẾN THẮNG!"
+            : p.score >= 1000
+            ? "🏆 HUYỀN THOẠI 1000+ ĐIỂM! 👑"
+            : p.score === 990
+            ? "ÔI TIẾC QUÁ! 990 ĐIỂM! 😭"
+            : "GAME OVER"}
         </span>
 
         {won && <p className="-mt-1 text-xs tracking-[0.2em] text-slate-300">BẠN ĐÃ ĂN HẾT MỌI THỨ TRÊN SÂN</p>}
+
+        {!won && p.score >= 1000 && (
+          <div className="anim-rise max-w-[320px] rounded-xl border border-amber-400/40 bg-gradient-to-b from-amber-500/15 to-amber-950/30 p-3 text-center text-xs leading-relaxed text-amber-200 shadow-[0_0_25px_rgba(250,204,21,0.25)] backdrop-blur-md">
+            <p className="font-extrabold text-amber-300 text-sm">🎉 KỶ LỤC VÔ TIỀN KHOÁNG HẬU!</p>
+            <p className="mt-1 text-[11px] text-slate-200">
+              Đã chính thức phá đảo mốc 1000 điểm không tưởng! Bạn là bậc thầy rắn săn mồi chân chính! 💖
+            </p>
+          </div>
+        )}
 
         {!won && p.score === 990 && (
           <div className="anim-rise max-w-[320px] rounded-xl border border-amber-400/40 bg-gradient-to-b from-amber-500/15 to-amber-950/30 p-3 text-center text-xs leading-relaxed text-amber-200 shadow-[0_0_25px_rgba(250,204,21,0.25)] backdrop-blur-md">
